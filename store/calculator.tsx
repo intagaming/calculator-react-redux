@@ -73,15 +73,19 @@ const calculatorSlice = createSlice({
       const input = action.payload;
 
       // Display function
-      const display = () => {
-        if (state.internal === Infinity) {
-          state.display = "Error";
-          return;
-        }
-        if (Object.is(state.internal, -0)) {
-          state.display = "-0";
+      const display = (override?: string) => {
+        if (!override) {
+          if (state.internal === Infinity) {
+            state.display = "Error";
+            return;
+          }
+          if (Object.is(state.internal, -0)) {
+            state.display = "-0";
+          } else {
+            state.display = state.internal.toString();
+          }
         } else {
-          state.display = state.internal.toString();
+          state.display = override;
         }
         state.display = new Intl.NumberFormat().format(+state.display);
         if (state.dotted) {
@@ -100,8 +104,8 @@ const calculatorSlice = createSlice({
           state.internal
         );
         state.stack[0] = result.toString();
-        // display();
-        state.display = state.stack[0];
+        display(state.stack[0]);
+        // state.display = state.stack[0];
         state.processed = true;
       };
 
@@ -120,8 +124,9 @@ const calculatorSlice = createSlice({
           current += ".";
         }
         const result = appendInput(current, input);
-        state.display = result;
+        // state.display = result;
         state.internal = +result;
+        display();
         state.processed = false;
         state.justClear = false;
         state.justPressOperator = false;
